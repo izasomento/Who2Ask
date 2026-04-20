@@ -186,12 +186,19 @@ function displayResults() {
     result = resultCategories.COULD_WORK;
   }
   
-  // Save to Session
+  // Generate Insights for the Detail View
+  const insights = generateInsights(state.answers);
+  
+  // Save to Session with detailed data
   state.evaluatedRecommenders.push({
     name: state.currentRecommenderName,
     score: state.totalScore,
     label: result.label,
-    meaning: result.meaning
+    meaning: result.meaning,
+    nextSteps: result.nextSteps,
+    checklist: result.checklist,
+    extraGuidance: result.extraGuidance,
+    insights: insights
   });
   
   // Update UI
@@ -221,33 +228,115 @@ function displayResults() {
       .map(step => `<li>${step}</li>`)
       .join('');
   } else {
-    // Explicitly hide and clear if no guidance exists (e.g. Strong Choice)
     extraContainer.classList.add('hidden');
-    extraTitle.innerText = '';
-    extraSteps.innerHTML = '';
   }
     
   showSection('results');
 }
 
+function generateInsights(answers) {
+  const strengths = [];
+  const concerns = [];
+
+  // Q2: How well
+  if (answers[1].text === 'Very well') strengths.push('Has a deep personal or professional connection with you.');
+  if (answers[1].text === 'Not very well') concerns.push('Connection might be too surface-level for a detailed letter.');
+
+  // Q3: Context
+  if (answers[2].text === 'Multiple contexts') strengths.push('Can speak to your abilities across different environments.');
+
+  // Q4: Growth
+  if (answers[3].text === 'Yes, over a long period') strengths.push('Has witnessed your long-term growth and consistency.');
+  if (answers[3].text === 'No, it was a brief interaction') concerns.push('Limited observation window may result in a generic letter.');
+
+  // Q5: Specificity
+  if (answers[4].text === 'Yes, they can provide specific examples') strengths.push('Able to provide the vivid anecdotes that admissions officers value.');
+  if (answers[4].text === 'No, they only know my basic info') concerns.push('May struggle to move beyond generic praise or basic facts.');
+
+  // Q6: Recent
+  if (answers[5].text === 'Yes, currently or within the last year') strengths.push('Can provide an up-to-date perspective on your current strengths.');
+  if (answers[5].text === 'No, it\'s been several years') concerns.push('Insights might feel outdated to an admissions committee.');
+
+  // Q7: Supportive
+  if (answers[6].text === 'Yes, definitely') strengths.push('A genuine advocate who is likely to put in the extra effort.');
+  if (answers[6].text === 'No, they seem too busy or unenthusiastic') concerns.push('Major risk: An unenthusiastic letter can be a significant red flag.');
+
+  // Q8: Deadline
+  if (answers[7].text === 'Urgent (less than 2 weeks)') concerns.push('Rushing a recommender often leads to a less thoughtful letter.');
+
+  return { strengths, concerns };
+}
+
 function showRanking() {
-  // Sort by score descending
   const sorted = [...state.evaluatedRecommenders].sort((a, b) => b.score - a.score);
   
-  elements.rankingList.innerHTML = sorted.map(rec => `
-    <div class="ranking-item">
-      <div class="ranking-item-main">
-        <h4>${rec.name}</h4>
-        <p>${rec.meaning}</p>
+  elements.rankingList.innerHTML = sorted.map((rec, index) => `
+    <div class="ranking-card" id="rank-card-${index}">
+      <div class="ranking-item clickable" onclick="toggleDetail(${index})">
+        <div class="ranking-item-main">
+          <h4>${rec.name}</h4>
+          <p class="meaning-preview">${rec.meaning}</p>
+        </div>
+        <div class="ranking-item-score">
+          <span class="badge ${rec.label.toLowerCase().replace(/ /g, '-')}">${rec.label}</span>
+          <span class="score-number">SCORE: ${rec.score}</span>
+        </div>
       </div>
-      <div class="ranking-item-score">
-        <span class="badge ${rec.label.toLowerCase().replace(/ /g, '-')}">${rec.label}</span>
-        <span class="score-number">SCORE: ${rec.score}</span>
+      
+      <div class="ranking-detail hidden" id="rank-detail-${index}">
+        <div class="detail-grid">
+          <div class="detail-column">
+            <h5>Strengths</h5>
+            <ul class="insight-list">
+              ${rec.insights.strengths.length > 0 
+                ? rec.insights.strengths.map(s => `<li>${s}</li>`).join('')
+                : '<li>No major strengths identified for this choice.</li>'}
+            </ul>
+          </div>
+          <div class="detail-column">
+            <h5>Possible Concerns</h5>
+            <ul class="insight-list">
+              ${rec.insights.concerns.length > 0 
+                ? rec.insights.concerns.map(c => `<li>${c}</li>`).join('')
+                : '<li>No major concerns identified.</li>'}
+            </ul>
+          </div>
+        </div>
+        
+        <div class="detail-summary">
+          <h5>Suggested Next Step</h5>
+          <p>${rec.nextSteps[0]}</p>
+        </div>
+
+        ${rec.extraGuidance ? `
+          <div class="detail-extra-guidance">
+            <h5>${rec.extraGuidance.title}</h5>
+            <ul class="insight-list">
+              ${rec.extraGuidance.steps.map(step => `<li>${step}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
       </div>
     </div>
   `).join('');
   
   showSection('ranking');
+}
+
+function toggleDetail(index) {
+  const detail = document.getElementById(`rank-detail-${index}`);
+  const card = document.getElementById(`rank-card-${index}`);
+  
+  const isHidden = detail.classList.contains('hidden');
+  
+  // Close all others first for a clean accordion feel
+  document.querySelectorAll('.ranking-detail').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.ranking-card').forEach(el => el.classList.remove('expanded'));
+  
+  if (isHidden) {
+    detail.classList.remove('hidden');
+    card.classList.add('expanded');
+  }
 }
 
 function resetEverything() {
@@ -259,8 +348,9 @@ function resetEverything() {
   }
 }
 
-// Global scope for onclick handlers in template literals
+// Global scope for onclick handlers
 window.selectOption = selectOption;
+window.toggleDetail = toggleDetail;
 
 // Run init
 init();

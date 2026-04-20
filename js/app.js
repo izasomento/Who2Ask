@@ -269,54 +269,26 @@ function generateInsights(answers) {
 
 function showRanking() {
   const sorted = [...state.evaluatedRecommenders].sort((a, b) => b.score - a.score);
+  // Store sorted list in state so we can reference by index correctly
+  state.currentSortedRanking = sorted;
   
   elements.rankingList.innerHTML = sorted.map((rec, index) => `
     <div class="ranking-card" id="rank-card-${index}">
-      <div class="ranking-item clickable" onclick="toggleDetail(${index})">
+      <button class="ranking-item clickable" onclick="toggleDetail(${index})" aria-expanded="false" aria-controls="rank-detail-${index}">
         <div class="ranking-item-main">
-          <h4>${rec.name}</h4>
+          <div class="ranking-name-row">
+            <h4>${rec.name}</h4>
+            <span class="expand-icon"></span>
+          </div>
           <p class="meaning-preview">${rec.meaning}</p>
         </div>
         <div class="ranking-item-score">
           <span class="badge ${rec.label.toLowerCase().replace(/ /g, '-')}">${rec.label}</span>
           <span class="score-number">SCORE: ${rec.score}</span>
         </div>
-      </div>
-      
-      <div class="ranking-detail hidden" id="rank-detail-${index}">
-        <div class="detail-grid">
-          <div class="detail-column">
-            <h5>Strengths</h5>
-            <ul class="insight-list">
-              ${rec.insights.strengths.length > 0 
-                ? rec.insights.strengths.map(s => `<li>${s}</li>`).join('')
-                : '<li>No major strengths identified for this choice.</li>'}
-            </ul>
-          </div>
-          <div class="detail-column">
-            <h5>Possible Concerns</h5>
-            <ul class="insight-list">
-              ${rec.insights.concerns.length > 0 
-                ? rec.insights.concerns.map(c => `<li>${c}</li>`).join('')
-                : '<li>No major concerns identified.</li>'}
-            </ul>
-          </div>
-        </div>
-        
-        <div class="detail-summary">
-          <h5>Suggested Next Step</h5>
-          <p>${rec.nextSteps[0]}</p>
-        </div>
-
-        ${rec.extraGuidance ? `
-          <div class="detail-extra-guidance">
-            <h5>${rec.extraGuidance.title}</h5>
-            <ul class="insight-list">
-              ${rec.extraGuidance.steps.map(step => `<li>${step}</li>`).join('')}
-            </ul>
-          </div>
-        ` : ''}
-      </div>
+      </button>
+      <!-- Detail container starts empty -->
+      <div class="ranking-detail hidden" id="rank-detail-${index}" role="region"></div>
     </div>
   `).join('');
   
@@ -324,18 +296,66 @@ function showRanking() {
 }
 
 function toggleDetail(index) {
-  const detail = document.getElementById(`rank-detail-${index}`);
+  const detailPanel = document.getElementById(`rank-detail-${index}`);
   const card = document.getElementById(`rank-card-${index}`);
+  const button = card.querySelector('.ranking-item');
+  const rec = state.currentSortedRanking[index];
   
-  const isHidden = detail.classList.contains('hidden');
+  const isOpening = detailPanel.classList.contains('hidden');
   
-  // Close all others first for a clean accordion feel
-  document.querySelectorAll('.ranking-detail').forEach(el => el.classList.add('hidden'));
-  document.querySelectorAll('.ranking-card').forEach(el => el.classList.remove('expanded'));
+  // 1. Close and clear ALL other panels first
+  document.querySelectorAll('.ranking-detail').forEach(panel => {
+    panel.classList.add('hidden');
+    panel.innerHTML = ''; // Remove from DOM for true lazy rendering
+  });
+  document.querySelectorAll('.ranking-card').forEach(c => c.classList.remove('expanded'));
+  document.querySelectorAll('.ranking-item').forEach(b => b.setAttribute('aria-expanded', 'false'));
   
-  if (isHidden) {
-    detail.classList.remove('hidden');
+  // 2. If we are opening THIS one, render content and show
+  if (isOpening) {
+    detailPanel.innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-column">
+          <h5>Strengths</h5>
+          <ul class="insight-list">
+            ${rec.insights.strengths.length > 0 
+              ? rec.insights.strengths.map(s => `<li>${s}</li>`).join('')
+              : '<li>No major strengths identified.</li>'}
+          </ul>
+        </div>
+        <div class="detail-column">
+          <h5>Possible Concerns</h5>
+          <ul class="insight-list">
+            ${rec.insights.concerns.length > 0 
+              ? rec.insights.concerns.map(c => `<li>${c}</li>`).join('')
+              : '<li>No major concerns identified.</li>'}
+          </ul>
+        </div>
+      </div>
+      
+      <div class="detail-summary">
+        <h5>Suggested Next Step</h5>
+        <p>${rec.nextSteps[0]}</p>
+      </div>
+
+      ${rec.extraGuidance ? `
+        <div class="detail-extra-guidance">
+          <h5>${rec.extraGuidance.title}</h5>
+          <ul class="insight-list">
+            ${rec.extraGuidance.steps.map(step => `<li>${step}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+    `;
+
+    detailPanel.classList.remove('hidden');
     card.classList.add('expanded');
+    button.setAttribute('aria-expanded', 'true');
+    
+    // Accessibility: Scroll into view
+    setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
   }
 }
 

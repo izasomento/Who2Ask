@@ -325,6 +325,57 @@ h2 {
 
 .ranking-item.clickable {
     cursor: pointer;
+    width: 100%;
+    border: none;
+    text-align: left;
+    font-family: inherit;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    padding: 24px;
+    background-color: #fafafa;
+}
+
+.ranking-name-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.expand-icon {
+    width: 12px;
+    height: 12px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.expand-icon::before,
+.expand-icon::after {
+    content: "";
+    position: absolute;
+    background-color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+/* Horizontal line */
+.expand-icon::before {
+    top: 5px;
+    left: 0;
+    width: 12px;
+    height: 2px;
+}
+
+/* Vertical line */
+.expand-icon::after {
+    top: 0;
+    left: 5px;
+    width: 2px;
+    height: 12px;
+}
+
+.ranking-card.expanded .expand-icon::after {
+    transform: rotate(90deg);
+    opacity: 0;
 }
 
 .ranking-item.clickable:hover {

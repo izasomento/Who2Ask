@@ -1,5 +1,5 @@
 /**
- * Who to Ask — Application Logic
+ * Letters for Minerva — Application Logic
  */
 
 // State Management

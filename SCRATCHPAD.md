@@ -79,7 +79,7 @@ Polish the design, improve responsiveness/accessibility, and finalize the conten
 ### 2026-04-20
 
 **State found**: App MVP complete and functional.
-**Action taken**: Added a comparison and ranking feature. Users can now input a name for each recommender, save results to a session-based list, and view a ranked ranking page. Refined the UI with academic-editorial styling.
+**Action taken**: Added a comparison and ranking feature. Users can now input a name for each recommender, save results to a session-based list, and view a ranked ranking page. Refined the UI with academic-editorial styling. Renamed the app to "Letters for Minerva".
 **State left**: App with multi-recommender comparison is functional.
 
 **Disclosure**:

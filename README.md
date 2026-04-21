@@ -1,8 +1,8 @@
-# Who to Ask
+# Letters for Minerva
 
-**Who to Ask** is a lightweight, student-centered web app designed to help prospective university applicants (especially first-generation and international students) evaluate their potential recommendation letter writers.
+**Letters for Minerva** is a lightweight, student-centered web app designed to help prospective university applicants (especially first-generation and international students) evaluate their potential recommendation letter writers.
 
-Choosing who to ask for a recommendation can be one of the most stressful parts of the application process. Who to Ask provides a structured way to reflect on these choices and ensures students are prepared when they finally reach out.
+Choosing who to ask for a recommendation can be one of the most stressful parts of the application process. Letters for Minerva provides a structured way to reflect on these choices and ensures students are prepared when they finally reach out.
 
 ## 🚀 Features
 
@@ -28,7 +28,7 @@ Choosing who to ask for a recommendation can be one of the most stressful parts 
 
 ## ⚖️ Disclaimer
 
-Who to Ask is a guidance tool intended for reflection. It is not an official admissions tool and does not predict admissions outcomes or guarantee the quality of a recommendation letter.
+Letters for Minerva is a guidance tool intended for reflection. It is not an official admissions tool and does not predict admissions outcomes or guarantee the quality of a recommendation letter.
 
 ---
 

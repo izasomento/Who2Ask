@@ -1,8 +1,8 @@
-# Who to Ask — Project Context
+# Letters for Minerva — Project Context
 
 ## Project Identity
 
-**Name**: Who to Ask
+**Name**: Letters for Minerva
 **Purpose**: Help prospective university applicants figure out who to ask for recommendation letters and how to prepare before reaching out.
 **Audience**: High school students, first-generation, and international applicants.
 **Human context**: Empowering students with clarity and confidence during a high-stakes, often opaque part of the application process.
